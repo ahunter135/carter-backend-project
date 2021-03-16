@@ -62,7 +62,9 @@ async function sheduledPushNotifications() {
         let appDate = moment(snap.data().date);
         var duration = moment.duration(appDate.diff(moment()));
         var minutes = duration.asMinutes();
-        if (minutes < element.data().reminders.frequency && minutes > 0) {
+        console.log(minutes);
+        console.log(element.data().reminders.notificationsFrequency);
+        if (minutes < element.data().reminders.notificationsFrequency && minutes > 0) {
           // Get users token
           if (!snap.data().notifiedUser) {
             let token = element.data().reminders.id.userId;
