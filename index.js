@@ -120,7 +120,7 @@ async function scheduledSMSNotifications() {
         let appDate = moment(snap.data().date);
         var duration = moment.duration(appDate.diff(moment()));
         var minutes = duration.asMinutes();
-        let utcOffset = moment().utcOffset(appDate);
+        let utcOffset = appDate.utcOffset();
         console.log(utcOffset);
         if (minutes < element.data().reminders.frequency && minutes > 0) {
           let client = await (await firebase.firestore().collection('users').doc(element.id).collection('clients').doc(snap.data().client).get()).data();
@@ -129,7 +129,7 @@ async function scheduledSMSNotifications() {
               .executions
               .create({
                 parameters: {
-                  appointment_time: appDate.format("MMM D, YYYY hh:mm a"),
+                  appointment_time: appDate.add(utcOffset).format("MMM D, YYYY hh:mm a"),
                   pet: snap.data().pet,
                   appointment_id: snap.id,
                   user_id: element.id
