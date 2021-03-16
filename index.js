@@ -26,8 +26,8 @@ app.get("/", async (req, res) => {
 
 app.post("/confirm", async (req, res) => {
   console.log(JSON.stringify(req.body));
-  let appId = req.body.body.appointment_id;
-  let userId = req.body.body.user_id;
+  let appId = req.body.appointment_id;
+  let userId = req.body.user_id;
   console.log(appId);
   await firebase.firestore().collection('users').doc(userId).collection('appointments').doc(appId).update({
     confirmed: true,
@@ -37,8 +37,8 @@ app.post("/confirm", async (req, res) => {
 })
 app.post("/cancel", async (req, res) => {
   console.log(JSON.stringify(req.body));
-  let appId = req.body.body.appointment_id;
-  let userId = req.body.body.user_id;
+  let appId = req.body.appointment_id;
+  let userId = req.body.user_id;
   console.log(appId);
   await firebase.firestore().collection('users').doc(userId).collection('appointments').doc(appId).update({
     confirmed: false,
