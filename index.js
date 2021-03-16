@@ -85,7 +85,7 @@ async function sheduledPushNotifications() {
         if (minutes < element.data().reminders.notificationsFrequency && minutes > 0) {
           // Get users token
           if (!snap.data().notifiedUser) {
-            let token = element.data().reminders.id.userId;
+            let token = element.data().reminders.ids.userId;
             const notification = {
               contents: {
                 'en': 'You have an appointment occurring in ' + minutes.toFixed(0) + ' minutes for ' + snap.data().pet
@@ -120,7 +120,7 @@ async function scheduledSMSNotifications() {
         let appDate = moment(snap.data().date);
         var duration = moment.duration(appDate.diff(moment()));
         var minutes = duration.asMinutes();
-        let utcOffset = appDate.utcOffset();
+        let utcOffset = appDate.utcOffset(snap.data().date);
         console.log(utcOffset);
         if (minutes < element.data().reminders.frequency && minutes > 0) {
           let client = await (await firebase.firestore().collection('users').doc(element.id).collection('clients').doc(snap.data().client).get()).data();
