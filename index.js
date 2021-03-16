@@ -77,7 +77,7 @@ async function sheduledPushNotifications() {
     let users = await firebase.firestore().collection('users').where('reminders.notifications', '==', true).where('bypasspro', '==', true).get();
     console.log("Pro Users with Reminders: " + users.size);
     users.forEach(async element => {
-      let data = await firebase.firestore().collection('users').doc(element.id).collection('appointments').where("notifiedUser", "==", "false").get();
+      let data = await firebase.firestore().collection('users').doc(element.id).collection('appointments').where("notifiedUser", "==", false).get();
       data.forEach(async snap => {
         let appDate = moment(snap.data().date);
         var duration = moment.duration(appDate.diff(moment()));
@@ -120,7 +120,8 @@ async function scheduledSMSNotifications() {
         let appDate = moment(snap.data().date);
         var duration = moment.duration(appDate.diff(moment()));
         var minutes = duration.asMinutes();
-
+        let utcOffset = moment().utcOffset(appDate);
+        console.log(utcOffset);
         if (minutes < element.data().reminders.frequency && minutes > 0) {
           let client = await (await firebase.firestore().collection('users').doc(element.id).collection('clients').doc(snap.data().client).get()).data();
           if (client.phone_number && !snap.data().notified) {
