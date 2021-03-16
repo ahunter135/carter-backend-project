@@ -20,11 +20,11 @@ app.get("/", async (req, res) => {
   res.status(200).send();
 });
 
-app.get("/confirm", async (req, res) => {
+app.post("/confirm", async (req, res) => {
   console.log("confirm");
   res.status(200).send();
 })
-app.get("/cancel", async (req, res) => {
+app.post("/cancel", async (req, res) => {
   console.log("cancel");
   res.status(200).send();
 })
