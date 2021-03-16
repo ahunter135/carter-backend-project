@@ -115,13 +115,12 @@ async function scheduledSMSNotifications() {
   var j = schedule.scheduleJob('* * * * *', (async () => {
     let users = await firebase.firestore().collection('users').where('reminders.on', '==', true).where('bypasspro', '==', true).get();
     users.forEach(async element => {
-      let data = await firebase.firestore().collection('users').doc(element.id).collection('appointments').where("notified", "==", false).get();
+      let data = await firebase.firestore().collection('users').doc(element.id).collection('appointments').where("notified", "==", false).where("deleted", "==", false).get();
       data.forEach(async snap => {
         let appDate = moment(snap.data().date);
         var duration = moment.duration(appDate.diff(moment()));
         var minutes = duration.asMinutes();
-        console.log(appDate.format("MMM D, YYYY hh:mm a"));
-        return;
+
         if (minutes < element.data().reminders.frequency && minutes > 0) {
           let client = await (await firebase.firestore().collection('users').doc(element.id).collection('clients').doc(snap.data().client).get()).data();
           if (client.phone_number && !snap.data().notified) {
