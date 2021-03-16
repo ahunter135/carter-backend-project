@@ -57,7 +57,7 @@ async function sheduledPushNotifications() {
     let users = await firebase.firestore().collection('users').where('reminders.notifications', '==', true).where('bypasspro', '==', true).get();
     console.log("Pro Users: " + users.size);
     users.forEach(async element => {
-      let data = await firebase.firestore().collection('users').doc(element.id).collection('appointments').where("notifiedUser", "!=", "true").get();
+      let data = await firebase.firestore().collection('users').doc(element.id).collection('appointments').where("notifiedUser", "==", "false").get();
       data.forEach(async snap => {
         let appDate = moment(snap.data().date);
         var duration = moment.duration(appDate.diff(moment()));
