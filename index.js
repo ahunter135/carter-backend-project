@@ -11,8 +11,13 @@ import cors from 'cors';
 var app = express();
 
 app.set("port", process.env.PORT || 5000);
-app.use(bodyParser.urlencoded());
-app.use(bodyParser.json());
+app.use(
+  express.urlencoded({
+    extended: true
+  })
+)
+
+app.use(express.json())
 app.use(cors());
 
 
@@ -21,7 +26,7 @@ app.get("/", async (req, res) => {
 });
 
 app.post("/confirm", async (req, res) => {
-  console.log(JSON.stringify(req));
+  console.log(JSON.stringify(req.body));
   res.status(200).send();
 })
 app.post("/cancel", async (req, res) => {
