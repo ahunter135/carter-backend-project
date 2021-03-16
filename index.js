@@ -64,31 +64,30 @@ async function sheduledPushNotifications() {
         var minutes = duration.asMinutes();
         console.log(minutes);
         console.log(element.data().reminders.notificationsFrequency);
-        console.log(minutes > 0);
-        console.log(minutes < element.data().reminders.notificationsFrequency);
         if (minutes < element.data().reminders.notificationsFrequency && minutes > 0) {
           // Get users token
-          let token = element.data().reminders.id.userId;
-          const notification = {
-            contents: {
-              'en': 'You have an appointment occurring in ' + minutes.toFixed(0) + ' minutes for ' + snap.data().pet
-            },
-            include_player_ids: [token]
-          };
+          if (!snap.data().notifiedUser) {
+            let token = element.data().reminders.id.userId;
+            const notification = {
+              contents: {
+                'en': 'You have an appointment occurring in ' + minutes.toFixed(0) + ' minutes for ' + snap.data().pet
+              },
+              include_player_ids: [token]
+            };
 
-          try {
-            await client.createNotification(notification);
-            console.log("Sent notification to " + token + " at " + moment().format("MMM D, YYYY hh:mm a"));
-            await firebase.firestore().collection('users').doc(element.id).collection('appointments').doc(snap.id).update({
-              notifiedUser: true
-            })
-          } catch (e) {
-            if (e instanceof OneSignal.HTTPError) {
-              console.log(e.statusCode);
-              console.log(e.body);
+            try {
+              await client.createNotification(notification);
+              console.log("Sent notification to " + token + " at " + moment().format("MMM D, YYYY hh:mm a"));
+              await firebase.firestore().collection('users').doc(element.id).collection('appointments').doc(snap.id).update({
+                notifiedUser: true
+              })
+            } catch (e) {
+              if (e instanceof OneSignal.HTTPError) {
+                console.log(e.statusCode);
+                console.log(e.body);
+              }
             }
           }
-
         }
       })
     })
