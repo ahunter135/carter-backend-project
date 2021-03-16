@@ -25,9 +25,10 @@ app.get("/", async (req, res) => {
 });
 
 app.post("/confirm", async (req, res) => {
-  console.log((req.body.body));
-  let appId = req.body.appointment_id;
-  let userId = req.body.user_id;
+  console.log((req.body));
+  let data = JSON.parse(req.body.data);
+  let appId = data.appointment_id;
+  let userId = data.user_id;
   console.log(appId);
   await firebase.firestore().collection('users').doc(userId).collection('appointments').doc(appId).update({
     confirmed: true,
