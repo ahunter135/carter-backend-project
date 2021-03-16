@@ -28,7 +28,6 @@ app.post("/confirm", async (req, res) => {
   let data = req.body;
   let appId = data.appointment_id;
   let userId = data.user_id;
-  console.log(appId);
   await firebase.firestore().collection('users').doc(userId).collection('appointments').doc(appId).update({
     confirmed: true,
     canceled: false
@@ -38,7 +37,6 @@ app.post("/confirm", async (req, res) => {
 app.post("/cancel", async (req, res) => {
   let appId = req.body.appointment_id;
   let userId = req.body.user_id;
-  console.log(appId);
   await firebase.firestore().collection('users').doc(userId).collection('appointments').doc(appId).update({
     confirmed: false,
     canceled: true
@@ -121,7 +119,10 @@ async function scheduledSMSNotifications() {
       data.forEach(async snap => {
         let appDate = moment(snap.data().date);
         var duration = moment.duration(appDate.diff(moment()));
+        var hours = duration.asHours();
         var minutes = duration.asMinutes();
+        if (hours < 0) appDate = appDate.subtract(hours, 'hours');
+        else appDate = appDate.add(hours, 'hours');
         if (minutes < element.data().reminders.frequency && minutes > 0) {
           let client = await (await firebase.firestore().collection('users').doc(element.id).collection('clients').doc(snap.data().client).get()).data();
           if (client.phone_number && !snap.data().notified) {
