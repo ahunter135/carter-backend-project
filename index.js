@@ -25,8 +25,7 @@ app.get("/", async (req, res) => {
 });
 
 app.post("/confirm", async (req, res) => {
-  console.log(req.body);
-  let data = req.body.data;
+  let data = req.body;
   let appId = data.appointment_id;
   let userId = data.user_id;
   console.log(appId);
@@ -37,7 +36,6 @@ app.post("/confirm", async (req, res) => {
   res.status(200).send();
 })
 app.post("/cancel", async (req, res) => {
-  console.log(JSON.stringify(req.body));
   let appId = req.body.appointment_id;
   let userId = req.body.user_id;
   console.log(appId);
