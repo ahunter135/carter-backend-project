@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <% include ../partials/header.ejs %>
+    <style>
+      .jumbotron {
+        height: 350px;
+        color: white;
+        text-shadow: #444 0 1px 1px;
+        background-size: 45%;
+      }
+
+      .thumbnail img {
+        width: 50%;
+        height: auto;
+      }
+    </style>
+    <script>
+      // wait for the DOM to be loaded
+      $(document).ready(function() {
+        $("form").submit(function(e) {
+          if (document.getElementById("message").value !== "undefined") {
+            var data = {};
+            data.message = document.getElementById("message").value;
+            $.ajax({
+              type: "POST",
+              data: JSON.stringify(data),
+              contentType: "application/json",
+              url: "/message",
+              success: function(data) {
+                document.getElementById("message").value = "";
+                getEntries();
+              }
+            });
+          } else {
+            var data = {};
+            data.username = document.getElementById("username").value;
+            data.password = document.getElementById("password").value;
+            document.getElementById("username").value = "";
+            document.getElementById("password").value = "";
+            $.ajax({
+              type: "POST",
+              data: JSON.stringify(data),
+              contentType: "application/json",
+              url: "/loginBrowser",
+              success: function(data) {
+                login();
+              }
+            });
+          }
+          e.preventDefault(); // avoid to execute the actual submit of the form.
+        });
+      });
+
+      function onload() {
+        var importForm = document.getElementById("importForm");
+        importForm.style.display = "none";
+        document.getElementById("message").value = undefined;
+      }
+      function eraseMessage() {
+        alert("ERASING");
+      }
+      async function getEntries() {
+        $.ajax({
+          type: "Get",
+          contentType: "application/json",
+          url: "/getEntries",
+          success: function(data) {
+            console.log(data);
+            document.getElementById("name").innerHTML = "";
+            data = JSON.parse(data);
+            for (var I = 0; I < data.length; I++)
+            {
+                let message = "<li>" + data[I].data.message + " <i class='fa fa-times-circle' aria-hidden='true' onclick='eraseMessage()'></i></li>";
+                document.getElementById("name").innerHTML += message;
+            }
+          }
+        });
+      }
+
+      async function login() {
+        document.getElementById("message").value = "";
+
+        var username = document.getElementById("username").value;
+        var password = document.getElementById("password").value;
+        var loginArea = document.getElementById("loginArea");
+        loginArea.style.display = "none";
+        var importForm = document.getElementById("importForm");
+        importForm.style.display = "block";
+        await getEntries();
+      }
+    </script>
+  </head>
+
+  <body onload="onload()">
+    <div class="jumbotron"></div>
+    <div style="margin-left: 15%; margin-right: 15%;" id="loginArea">
+      <div class="row">
+        <form class="col s12" id="myForm" action="">
+          <div class="row">
+            <div class="input-field col s6">
+              <input
+                id="username"
+                type="text"
+                class="validate"
+                name="username"
+              />
+              <label for="username">Username</label>
+            </div>
+            <div class="input-field col s6">
+              <input
+                id="password"
+                type="password"
+                class="validate"
+                name="password"
+              />
+              <label for="password">Password</label>
+            </div>
+          </div>
+          <button
+            class="btn waves-effect waves-light"
+            type="submit"
+            name="action"
+          >
+            Login
+          </button>
+        </form>
+      </div>
+    </div>
+    <!--Add Input form here-->
+    <div id="importForm" style="padding: 10px">
+      <form class="col s12" id="myForm" action="">
+        <div class="form-group">
+          <label for="comment">Message:</label>
+          <textarea class="form-control" rows="5" id="message"></textarea>
+        </div>
+        <button
+          class="btn waves-effect waves-light"
+          type="submit"
+          name="action"
+        >
+          Submit
+        </button>
+      </form>
+      <div id="name">
+        <ul>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>
