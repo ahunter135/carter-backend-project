@@ -119,10 +119,9 @@ async function scheduledSMSNotifications() {
       data.forEach(async snap => {
         let appDate = moment(snap.data().date);
         var duration = moment.duration(appDate.diff(moment()));
-        var hours = duration.asHours();
         var minutes = duration.asMinutes();
-        if (hours < 0) appDate = appDate.subtract(hours, 'hours');
-        else appDate = appDate.add(hours, 'hours');
+        console.log(appDate.format("MMM D, YYYY hh:mm a"));
+        return;
         if (minutes < element.data().reminders.frequency && minutes > 0) {
           let client = await (await firebase.firestore().collection('users').doc(element.id).collection('clients').doc(snap.data().client).get()).data();
           if (client.phone_number && !snap.data().notified) {
@@ -130,7 +129,7 @@ async function scheduledSMSNotifications() {
               .executions
               .create({
                 parameters: {
-                  appointment_time: moment(appDate).format("MMM D, YYYY hh:mm a"),
+                  appointment_time: appDate.format("MMM D, YYYY hh:mm a"),
                   pet: snap.data().pet,
                   appointment_id: snap.id,
                   user_id: element.id
