@@ -20,6 +20,14 @@ app.get("/", async (req, res) => {
   res.status(200).send();
 });
 
+app.post("/confirm", async (req, res) => {
+  console.log("confirm");
+  res.status(200).send();
+})
+app.post("/cancel", async (req, res) => {
+  console.log("cancel");
+  res.status(200).send();
+})
 app.listen(app.get("port"), function () {
   console.log("Node app is running on port", app.get("port"));
 });
@@ -49,21 +57,20 @@ firebase.auth().signInWithEmailAndPassword("support@getclipped.app", "Wizardofiz
   sheduledPushNotifications();
   //scheduledSMSNotifications();
   sendMeNotificationsOfNewUsers();
+  sendAppointmentConfirmation('+16155879346');
 });
 
 
 async function sheduledPushNotifications() {
   var j = schedule.scheduleJob('*/5 * * * *', (async () => {
     let users = await firebase.firestore().collection('users').where('reminders.notifications', '==', true).where('bypasspro', '==', true).get();
-    console.log("Pro Users: " + users.size);
+    console.log("Pro Users with Reminders: " + users.size);
     users.forEach(async element => {
       let data = await firebase.firestore().collection('users').doc(element.id).collection('appointments').where("notifiedUser", "==", "false").get();
       data.forEach(async snap => {
         let appDate = moment(snap.data().date);
         var duration = moment.duration(appDate.diff(moment()));
         var minutes = duration.asMinutes();
-        console.log(minutes);
-        console.log(element.data().reminders.notificationsFrequency);
         if (minutes < element.data().reminders.notificationsFrequency && minutes > 0) {
           // Get users token
           if (!snap.data().notifiedUser) {
@@ -98,7 +105,7 @@ async function scheduledSMSNotifications() {
   var j = schedule.scheduleJob('*/5 * * * *', (async () => {
     let users = await firebase.firestore().collection('users').where('reminders.on', '==', true).where('bypasspro', '==', true).get();
     users.forEach(async element => {
-      let data = await firebase.firestore().collection('users').doc(element.id).collection('appointments').get();
+      let data = await firebase.firestore().collection('users').doc(element.id).collection('appointments').where("notified", "==", "false").get();
       data.forEach(async snap => {
         let appDate = moment(snap.data().date);
         var duration = moment.duration(appDate.diff(moment()));
@@ -108,7 +115,7 @@ async function scheduledSMSNotifications() {
           if (client.phone_number && !snap.data().notified) {
             twilioClient.messages.create({
               body: 'Your Pet Grooming Appointment is Scheduled for ' + snap.data().pet + " at " + moment(appDate).format("MMM D, YYYY hh:mm a"),
-              from: '+13603287987',
+              from: '+16158806176',
               to: client.phone_number
             })
             await firebase.firestore().collection('users').doc(element.id).collection('appointments').doc(snap.id).update({
@@ -151,5 +158,18 @@ async function sendMeNotificationsOfNewUsers() {
     }
   }));
 
+}
+
+async function sendAppointmentConfirmation(toNumber) {
+  console.log("HERE");
+  twilioClient.studio.v2.flows('FW69493b9f656de2552059a055208f4faa')
+    .executions
+    .create({
+      parameters: {
+        appointment_time: moment().format("hh:mm a"),
+        pet: 'Izzy'
+      }, to: toNumber, from: '+16158806176'
+    })
+    .then(execution => console.log(execution.sid));
 }
 
