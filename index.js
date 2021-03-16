@@ -20,17 +20,26 @@ app.use(
 app.use(express.json())
 app.use(cors());
 
-
 app.get("/", async (req, res) => {
   res.status(200).send();
 });
 
 app.post("/confirm", async (req, res) => {
-  console.log(JSON.stringify(req.body));
+  let appId = req.body.body;
+  console.log(appId);
+  await firebase.firestore().collection('users').doc(element.id).collection('appointments').doc(appId).update({
+    confirmed: true,
+    canceled: false
+  })
   res.status(200).send();
 })
 app.post("/cancel", async (req, res) => {
-  console.log(JSON.stringify(req));
+  let appId = req.body.body;
+  console.log(appId);
+  await firebase.firestore().collection('users').doc(element.id).collection('appointments').doc(appId).update({
+    confirmed: false,
+    canceled: true
+  })
   res.status(200).send();
 })
 app.listen(app.get("port"), function () {
