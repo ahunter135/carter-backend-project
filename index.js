@@ -38,8 +38,6 @@ var rule = new schedule.RecurrenceRule();
 rule.minute = 1;
 const twilioClient = twilio("AC44703bfc8a1d096678112c2a05ca1e81", "dfcd9cf74a74733daa0aa085d3a4ba72");
 
-var totalUsers = 0;
-
 firebase.initializeApp(
   {
     apiKey: "AIzaSyCZ7Mr6qSgFcA7A0p5JVfjby-lXlHGZbKc",
@@ -82,7 +80,6 @@ async function sheduledPushNotifications() {
 
             try {
               await client.createNotification(notification);
-              console.log("Sent notification to " + token + " at " + moment().format("MMM D, YYYY hh:mm a"));
               await firebase.firestore().collection('users').doc(element.id).collection('appointments').doc(snap.id).update({
                 notifiedUser: true
               })
@@ -100,10 +97,10 @@ async function sheduledPushNotifications() {
 
 }
 async function scheduledSMSNotifications() {
-  var j = schedule.scheduleJob('*/5 * * * *', (async () => {
+  var j = schedule.scheduleJob('* * * * *', (async () => {
     let users = await firebase.firestore().collection('users').where('reminders.on', '==', true).where('bypasspro', '==', true).get();
     users.forEach(async element => {
-      let data = await firebase.firestore().collection('users').doc(element.id).collection('appointments').where("notified", "==", "false").get();
+      let data = await firebase.firestore().collection('users').doc(element.id).collection('appointments').where("notified", "==", false).get();
       data.forEach(async snap => {
         let appDate = moment(snap.data().date);
         var duration = moment.duration(appDate.diff(moment()));
@@ -111,11 +108,6 @@ async function scheduledSMSNotifications() {
         if (minutes < element.data().reminders.frequency && minutes > 0) {
           let client = await (await firebase.firestore().collection('users').doc(element.id).collection('clients').doc(snap.data().client).get()).data();
           if (client.phone_number && !snap.data().notified) {
-            /*twilioClient.messages.create({
-              body: 'Your Pet Grooming Appointment is Scheduled for ' + snap.data().pet + " at " + moment(appDate).format("MMM D, YYYY hh:mm a"),
-              from: '+16158806176',
-              to: client.phone_number
-            })*/
             let execution = await twilioClient.studio.v2.flows('FW69493b9f656de2552059a055208f4faa')
               .executions
               .create({
