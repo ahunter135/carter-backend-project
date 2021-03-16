@@ -25,8 +25,8 @@ app.get("/", async (req, res) => {
 });
 
 app.post("/confirm", async (req, res) => {
-  console.log((req.body));
-  let data = JSON.parse(req.body.data);
+  console.log(req.body);
+  let data = req.body.data;
   let appId = data.appointment_id;
   let userId = data.user_id;
   console.log(appId);
