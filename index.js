@@ -21,11 +21,11 @@ app.get("/", async (req, res) => {
 });
 
 app.post("/confirm", async (req, res) => {
-  console.log("confirm");
+  console.log(JSON.stringify(req));
   res.status(200).send();
 })
 app.post("/cancel", async (req, res) => {
-  console.log("cancel");
+  console.log(JSON.stringify(req));
   res.status(200).send();
 })
 app.listen(app.get("port"), function () {
@@ -113,13 +113,24 @@ async function scheduledSMSNotifications() {
         if (minutes < element.data().reminders.frequency && minutes > 0) {
           let client = await (await firebase.firestore().collection('users').doc(element.id).collection('clients').doc(snap.data().client).get()).data();
           if (client.phone_number && !snap.data().notified) {
-            twilioClient.messages.create({
+            /*twilioClient.messages.create({
               body: 'Your Pet Grooming Appointment is Scheduled for ' + snap.data().pet + " at " + moment(appDate).format("MMM D, YYYY hh:mm a"),
               from: '+16158806176',
               to: client.phone_number
-            })
+            })*/
+            let execution = await twilioClient.studio.v2.flows('FW69493b9f656de2552059a055208f4faa')
+              .executions
+              .create({
+                parameters: {
+                  appointment_time: moment(appDate).format("MMM D, YYYY hh:mm a"),
+                  pet: snap.data().pet,
+                  appointment_id: snap.id
+                }, to: client.phone_number, from: '+16158806176'
+              });
+
             await firebase.firestore().collection('users').doc(element.id).collection('appointments').doc(snap.id).update({
-              notified: true
+              notified: true,
+              exSid: execution.sid
             })
           }
         }
@@ -128,48 +139,3 @@ async function scheduledSMSNotifications() {
   }));
 
 }
-async function sendMeNotificationsOfNewUsers() {
-  var j = schedule.scheduleJob('0 0 */3 * * *', (async () => {
-    let users = await firebase.firestore().collection('users').get();
-    if (users.size > totalUsers) {
-      let temp = totalUsers;
-      totalUsers = users.size;
-      let amt = totalUsers - temp;
-      let token = "2f65101e-6ac3-4d2e-9b2c-3333f0349d14";
-      const notification = {
-        contents: {
-          'en': 'You gained a new users! Total Users: ' + totalUsers + ". Thats " + amt + ' more.'
-        },
-        include_player_ids: [token]
-      };
-
-      try {
-        await client.createNotification(notification);
-        console.log("Sent notification to " + token + " at " + moment().format("MMM D, YYYY hh:mm a"));
-        await firebase.firestore().collection('users').doc(element.id).collection('appointments').doc(snap.id).update({
-          notifiedUser: true
-        })
-      } catch (e) {
-        if (e instanceof OneSignal.HTTPError) {
-          console.log(e.statusCode);
-          console.log(e.body);
-        }
-      }
-    }
-  }));
-
-}
-
-async function sendAppointmentConfirmation(toNumber) {
-  console.log("HERE");
-  twilioClient.studio.v2.flows('FW69493b9f656de2552059a055208f4faa')
-    .executions
-    .create({
-      parameters: {
-        appointment_time: moment().format("hh:mm a"),
-        pet: 'Izzy'
-      }, to: toNumber, from: '+16158806176'
-    })
-    .then(execution => console.log(execution.sid));
-}
-
