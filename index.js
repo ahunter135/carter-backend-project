@@ -1,17 +1,19 @@
-var express = require("express");
+
+import express from 'express';
+import firebase from 'firebase';
+import moment from 'moment';
+import twilio from 'twilio';
+import schedule from 'node-schedule';
+import OneSignal from 'onesignal-node';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+
 var app = express();
-var cors = require("cors");
-var firebase = require('firebase');
-var moment = require('moment');
-var twilio = require('twilio');
-var schedule = require('node-schedule');
-var OneSignal = require('onesignal-node');
 
 app.set("port", process.env.PORT || 5000);
 app.use(bodyParser.urlencoded());
 app.use(bodyParser.json());
 app.use(cors());
-app.use(express.static(__dirname + "/public"));
 
 
 app.get("/", async (req, res) => {
