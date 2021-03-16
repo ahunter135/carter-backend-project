@@ -25,18 +25,22 @@ app.get("/", async (req, res) => {
 });
 
 app.post("/confirm", async (req, res) => {
-  let appId = req.body.body;
+  console.log(JSON.stringify(req.body));
+  let appId = req.body.body.appointment_id;
+  let userId = req.body.body.user_id;
   console.log(appId);
-  await firebase.firestore().collection('users').doc(element.id).collection('appointments').doc(appId).update({
+  await firebase.firestore().collection('users').doc(userId).collection('appointments').doc(appId).update({
     confirmed: true,
     canceled: false
   })
   res.status(200).send();
 })
 app.post("/cancel", async (req, res) => {
-  let appId = req.body.body;
+  console.log(JSON.stringify(req.body));
+  let appId = req.body.body.appointment_id;
+  let userId = req.body.body.user_id;
   console.log(appId);
-  await firebase.firestore().collection('users').doc(element.id).collection('appointments').doc(appId).update({
+  await firebase.firestore().collection('users').doc(userId).collection('appointments').doc(appId).update({
     confirmed: false,
     canceled: true
   })
@@ -128,7 +132,8 @@ async function scheduledSMSNotifications() {
                 parameters: {
                   appointment_time: moment(appDate).format("MMM D, YYYY hh:mm a"),
                   pet: snap.data().pet,
-                  appointment_id: snap.id
+                  appointment_id: snap.id,
+                  user_id: element.id
                 }, to: client.phone_number, from: '+16158806176'
               });
 
