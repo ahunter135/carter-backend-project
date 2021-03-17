@@ -68,7 +68,7 @@ firebase.initializeApp(
 
 firebase.auth().signInWithEmailAndPassword("support@getclipped.app", "Wizardofiz2018!").then((data) => {
   sheduledPushNotifications();
-  //scheduledSMSNotifications();
+  scheduledSMSNotifications();
 });
 
 
@@ -77,7 +77,7 @@ async function sheduledPushNotifications() {
     let users = await firebase.firestore().collection('users').where('reminders.notifications', '==', true).where('bypasspro', '==', true).get();
     console.log("Pro Users with Reminders: " + users.size);
     users.forEach(async element => {
-      let data = await firebase.firestore().collection('users').doc(element.id).collection('appointments').where("notifiedUser", "==", false).get();
+      let data = await firebase.firestore().collection('users').doc(element.id).collection('appointments').where("notifiedUser", "==", false).where("deleted", "==", false).get();
       data.forEach(async snap => {
         let appDate = moment.tz(snap.data().date, snap.data().timezone);
         var duration = moment.duration(appDate.diff(moment.tz(snap.data().timezone)));
@@ -112,10 +112,10 @@ async function sheduledPushNotifications() {
 
 }
 async function scheduledSMSNotifications() {
-  var j = schedule.scheduleJob('* * * * *', (async () => {
+  var j = schedule.scheduleJob('*/5 * * * *', (async () => {
     let users = await firebase.firestore().collection('users').where('reminders.on', '==', true).where('bypasspro', '==', true).get();
     users.forEach(async element => {
-      let data = await firebase.firestore().collection('users').doc(element.id).collection('appointments').where("notified", "==", false).get();
+      let data = await firebase.firestore().collection('users').doc(element.id).collection('appointments').where("notified", "==", false).where("deleted", "==", false).get();
       data.forEach(async snap => {
         let appDate = moment.tz(snap.data().date, snap.data().timezone);
         var duration = moment.duration(appDate.diff(moment.tz(snap.data().timezone)));
