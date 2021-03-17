@@ -79,8 +79,8 @@ async function sheduledPushNotifications() {
     users.forEach(async element => {
       let data = await firebase.firestore().collection('users').doc(element.id).collection('appointments').where("notifiedUser", "==", false).get();
       data.forEach(async snap => {
-        let appDate = moment(snap.data().date);
-        var duration = moment.duration(appDate.diff(moment()));
+        let appDate = moment.tz(snap.data().date, snap.data().timezone);
+        var duration = moment.duration(appDate.diff(moment.tz(snap.data().timezone)));
         var minutes = duration.asMinutes();
         if (minutes < element.data().reminders.notificationsFrequency && minutes > 0) {
           // Get users token
