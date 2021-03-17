@@ -30,7 +30,7 @@ app.post("/confirm", async (req, res) => {
   let userId = data.user_id;
   await firebase.firestore().collection('users').doc(userId).collection('appointments').doc(appId).update({
     confirmed: true,
-    canceled: false
+    cancelled: false
   })
   res.status(200).send();
 })
@@ -39,7 +39,7 @@ app.post("/cancel", async (req, res) => {
   let userId = req.body.user_id;
   await firebase.firestore().collection('users').doc(userId).collection('appointments').doc(appId).update({
     confirmed: false,
-    canceled: true
+    cancelled: true
   })
   res.status(200).send();
 })
@@ -85,7 +85,7 @@ async function sheduledPushNotifications() {
         if (minutes < element.data().reminders.notificationsFrequency && minutes > 0) {
           // Get users token
           if (!snap.data().notifiedUser) {
-            let token = element.data().reminders.ids.userId;
+            let token = element.data().reminders.id.userId;
             const notification = {
               contents: {
                 'en': 'You have an appointment occurring in ' + minutes.toFixed(0) + ' minutes for ' + snap.data().pet
