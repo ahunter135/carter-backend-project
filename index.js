@@ -68,7 +68,7 @@ firebase.initializeApp(
 
 firebase.auth().signInWithEmailAndPassword("support@getclipped.app", "Wizardofiz2018!").then((data) => {
   sheduledPushNotifications();
-  scheduledSMSNotifications();
+  //scheduledSMSNotifications();
 });
 
 
