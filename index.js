@@ -1,7 +1,7 @@
 
 import express from 'express';
 import firebase from 'firebase';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import twilio from 'twilio';
 import schedule from 'node-schedule';
 import OneSignal from 'onesignal-node';
@@ -68,7 +68,7 @@ firebase.initializeApp(
 
 firebase.auth().signInWithEmailAndPassword("support@getclipped.app", "Wizardofiz2018!").then((data) => {
   sheduledPushNotifications();
-  //scheduledSMSNotifications();
+  scheduledSMSNotifications();
 });
 
 
@@ -117,10 +117,9 @@ async function scheduledSMSNotifications() {
     users.forEach(async element => {
       let data = await firebase.firestore().collection('users').doc(element.id).collection('appointments').where("notified", "==", false).get();
       data.forEach(async snap => {
-        let appDate = moment(snap.data().date);
-        var duration = moment.duration(appDate.diff(moment()));
+        let appDate = moment.tz(snap.data().date, snap.data().timezone);
+        var duration = moment.duration(appDate.diff(moment.tz(snap.data().timezone)));
         var minutes = duration.asMinutes();
-        let utcOffset = appDate.utcOffset(snap.data().date, true);
         if (minutes < element.data().reminders.frequency && minutes > 0) {
           let client = await (await firebase.firestore().collection('users').doc(element.id).collection('clients').doc(snap.data().client).get()).data();
           if (client.phone_number && !snap.data().notified) {
@@ -128,7 +127,7 @@ async function scheduledSMSNotifications() {
               .executions
               .create({
                 parameters: {
-                  appointment_time: utcOffset.format("MMM D, YYYY hh:mm a"),
+                  appointment_time: appDate.format("MMM D, YYYY hh:mm a"),
                   pet: snap.data().pet,
                   appointment_id: snap.id,
                   user_id: element.id
