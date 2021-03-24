@@ -114,21 +114,23 @@ async function sheduledPushNotifications() {
 async function scheduledSMSNotifications() {
   var j = schedule.scheduleJob('*/5 * * * *', (async () => {
     let users = await firebase.firestore().collection('users').where('reminders.on', '==', true).where('bypasspro', '==', true).get();
+    console.log("Pro Users with SMS: " + users.size);
+
     users.forEach(async element => {
       let data = await firebase.firestore().collection('users').doc(element.id).collection('appointments').where("notified", "==", false).where("deleted", "==", false).get();
       data.forEach(async snap => {
-        let appDate = moment.tz(snap.data().date, snap.data().timezone);
-        var duration = moment.duration(appDate.diff(moment.tz(snap.data().timezone)));
-        var minutes = duration.asMinutes();
-        if (minutes < element.data().reminders.frequency && minutes > 0) {
+        let appDate = moment(snap.data().date).startOf('day');
+        var diffDays = appDate.diff(moment().startOf('day'), 'days');
+
+        if (diffDays <= element.data().reminders.frequency && diffDays > 0) {
           let client = await (await firebase.firestore().collection('users').doc(element.id).collection('clients').doc(snap.data().client).get()).data();
           if (client.phone_number && !snap.data().notified) {
             let execution = await twilioClient.studio.v2.flows('FW69493b9f656de2552059a055208f4faa')
               .executions
               .create({
                 parameters: {
-                  appointment_time: appDate.format("MMM D, YYYY hh:mm a"),
-                  pet: snap.data().pet,
+                  appointment_time: moment.tz(snap.data().date, snap.data().timezone).format("MMM D, YYYY hh:mm a"),
+                  pet: snap.data().pet.name ? snap.data().pet.name : snap.data().pet,
                   appointment_id: snap.id,
                   user_id: element.id
                 }, to: client.phone_number, from: '+16158806176'
