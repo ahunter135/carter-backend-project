@@ -74,7 +74,7 @@ firebase.auth().signInWithEmailAndPassword("support@getclipped.app", "Wizardofiz
 
 async function sheduledPushNotifications() {
   var j = schedule.scheduleJob('*/5 * * * *', (async () => {
-    let users = await firebase.firestore().collection('users').where('reminders.notifications', '==', true).where('bypasspro', '==', true).get();
+    let users = await firebase.firestore().collection('users').where('reminders.notifications', '==', true).get();
     console.log("Pro Users with Reminders: " + users.size);
     users.forEach(async element => {
       let data = await firebase.firestore().collection('users').doc(element.id).collection('appointments').where("notifiedUser", "==", false).where("deleted", "==", false).get();
